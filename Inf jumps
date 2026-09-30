@@ -1,0 +1,413 @@
+-- DEOBF BY discord.gg/printed NUMBER 1
+print("DEOBF BY discord.gg/printed NUMBER 1")
+
+local playersService, Stats, RunService, TweenService, UserInputService, CoreGui, Lighting, TeleportService, workspaceService
+local localPlayer, playerGui, attachGui, generateRandomGuiName, appState, findAdminCommandButton, cloneAdminButtonIcon, executeAdminCommand, executeAllAdminCommands, optimizeInstance
+local applyPerformanceSettings, settings, saveSettings, restorePanelPosition, savePanelPosition, semiTeleportSettings, selectedSlot, baseLocations, stopAutoWalk, isEnemyBase
+local semiTeleportState, runSemiTeleport, enableBalloonMonitor, disableBalloonMonitor, enableAntiTurret, disableAntiTurret, enableGameStretcher, disableGameStretcher, unlockBaseFloor, logoAsset
+local mainGui, addGradientStroke, createUICorner, makeDraggable, hudWidth, hudHeight, controlButtonSize, controlButtonSpacing, layoutMargin, hudTopOffset
+local hudFrame
+local getCharacterRootPart, getNearestEnemyPlayer, isMobile
+do
+    do
+        local applyReplicationFlags, findFlightTool, targetPlayer, getBaseOwner, runStealBoosts, beginPromptHold, waitForPromptDelay, finishPromptHold, startAutoWalk, teleportRoutes
+        do
+            local HttpService
+            if not game:IsLoaded() then
+                game.Loaded:Wait()
+            end
+            if setfpscap then
+                setfpscap(9999)
+            end
+            playersService = game:GetService("Players")
+            Stats = game:GetService("Stats")
+            RunService = game:GetService("RunService")
+            TweenService = game:GetService("TweenService")
+            UserInputService = game:GetService("UserInputService")
+            HttpService = game:GetService("HttpService")
+            CoreGui = game:GetService("CoreGui")
+            Lighting = game:GetService("Lighting")
+            TeleportService = game:GetService("TeleportService")
+            workspaceService = game:GetService("Workspace")
+            localPlayer = playersService.LocalPlayer
+            playerGui = localPlayer:WaitForChild("PlayerGui")
+            math.randomseed(os.time() + tick() * 1000)
+            getCharacterRootPart = function()
+                local character = localPlayer.Character
+                return character and character:FindFirstChild("HumanoidRootPart")
+            end
+            getNearestEnemyPlayer = function()
+                local rootPart = getCharacterRootPart()
+                if not rootPart then
+                    return nil
+                end
+                local nearestPlayer = nil
+                local nearestDistance = math.huge
+                for _, player in ipairs(playersService:GetPlayers()) do
+                    if player ~= localPlayer and player.Character then
+                        local targetRootPart = player.Character:FindFirstChild("HumanoidRootPart")
+                        local humanoid = player.Character:FindFirstChildOfClass("Humanoid")
+                        if targetRootPart and humanoid and humanoid.Health > 0 then
+                            local distance = (targetRootPart.Position - rootPart.Position).Magnitude
+                            if distance < nearestDistance then
+                                nearestDistance = distance
+                                nearestPlayer = player
+                            end
+                        end
+                    end
+                end
+                return nearestPlayer
+            end
+            do
+                local function generateRandomIdentifier()
+                    local randomCharacters = {}
+                    for i = 1, 12 + math.random(0, 8) do
+                        randomCharacters[i] = ("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"):sub(
+                            math.random(1, 62),
+                            math.random(1, 62)
+                        )
+                    end
+                    return table.concat(randomCharacters)
+                end
+                attachGui = function(gui)
+                    local coreGui = game:GetService("CoreGui")
+                    local fallbackPlayerGui = playersService.LocalPlayer:WaitForChild("PlayerGui")
+                    for _, getterName in ipairs({
+                        "gethui",
+                        "get_hidden_gui",
+                    }) do
+                        local hiddenGuiGetter = rawget(_G, getterName)
+                        if type(hiddenGuiGetter) == "function" then
+                            local ok, parent = pcall(hiddenGuiGetter)
+                            if ok and typeof(parent) == "Instance" then
+                                if
+                                    pcall(function()
+                                        gui.Parent = parent
+                                    end) and gui.Parent == parent
+                                then
+                                    return true
+                                end
+                            end
+                        end
+                    end
+                    local synApi = rawget(_G, "syn")
+                    if synApi and type(synApi.protect_gui) == "function" then
+                        if pcall(synApi.protect_gui, gui) then
+                            pcall(function()
+                                gui.Parent = coreGui
+                            end)
+                            if gui.Parent then
+                                return true
+                            end
+                        end
+                    end
+                    for _, item87 in ipairs({
+                        "protectgui",
+                        "protect_gui",
+                    }) do
+                        local rawgetResult88 = rawget(_G, item87)
+                        if type(rawgetResult88) == "function" then
+                            pcall(rawgetResult88, gui)
+                        end
+                    end
+                    pcall(function()
+                        gui.Parent = coreGui
+                    end)
+                    if not gui.Parent then
+                        pcall(function()
+                            gui.Parent = fallbackPlayerGui
+                        end)
+                    end
+                    return gui.Parent ~= nil
+                end
+                generateRandomGuiName = generateRandomIdentifier
+            end
+            pcall(function()
+                if getgenv().IceHubLoaded then
+                    return
+                end
+                getgenv().IceHubLoaded = true
+            end)
+            appState = {
+                adminRemote = nil,
+                lastFired = {},
+                defMode = "None",
+                defLastPunish = {},
+                defStealCounts = {},
+                Connections = {},
+                enemyPlots = {},
+                stealCbCache = {},
+                stealActive = false,
+                stealBusy = false,
+                lastTpTime = 0,
+                allGradients = {},
+                isMobile = false,
+                redPos = nil,
+                greenPos = nil,
+                redDot = nil,
+                greenDot = nil,
+                guideLine = nil,
+                sentryEnabled = false,
+                sentryConn = nil,
+                gameStretcherEnabled = false,
+                gameStretcherConn = nil,
+                AutoResetBalloonEnabled = false,
+                balloonGuiConnections = {},
+                balloonChildAddedConn = nil,
+                menuOpen = false,
+                screenGui = nil,
+                statsLabel = nil,
+                panel = nil,
+                topButtons = {},
+                tabButtons = {},
+                tabContents = {},
+                PANEL_W = 560,
+                PANEL_H = 470,
+                HUD_WIDTH = 310,
+                HUD_HEIGHT = 74,
+                COL_DARK = Color3.fromRGB(7, 13, 27),
+                COL_WHITE = Color3.fromRGB(235, 245, 255),
+                COL_DIM = Color3.fromRGB(105, 195, 255),
+            }
+            do
+                local accentKeys = {}
+                local colorKeypoint93 = ColorSequenceKeypoint.new(0, Color3.fromRGB(70, 145, 255))
+                local colorKeypoint94 = ColorSequenceKeypoint.new(0.2, Color3.fromRGB(115, 205, 255))
+                local colorKeypoint95 = ColorSequenceKeypoint.new(0.4, Color3.fromRGB(235, 248, 255))
+                local colorKeypoint96 = ColorSequenceKeypoint.new(0.6, Color3.fromRGB(90, 170, 255))
+                local colorKeypoint97 = ColorSequenceKeypoint.new(0.8, Color3.fromRGB(45, 230, 255))
+                accentKeys[1] = colorKeypoint93
+                accentKeys[2] = colorKeypoint94
+                accentKeys[3] = colorKeypoint95
+                accentKeys[4] = colorKeypoint96
+                accentKeys[5] = colorKeypoint97
+                accentKeys[6] = ColorSequenceKeypoint.new(1, Color3.fromRGB(105, 190, 255))
+                appState.ACCENT_KEYS = accentKeys
+            end
+            do
+                local bgKeys = {}
+                local colorKeypoint100 = ColorSequenceKeypoint.new(0, Color3.fromRGB(5, 10, 22))
+                local colorKeypoint101 = ColorSequenceKeypoint.new(0.5, Color3.fromRGB(10, 17, 34))
+                bgKeys[1] = colorKeypoint100
+                bgKeys[2] = colorKeypoint101
+                bgKeys[3] = ColorSequenceKeypoint.new(1, Color3.fromRGB(6, 16, 36))
+                appState.BG_KEYS = bgKeys
+            end
+            appState.epFrame = nil
+            appState.epContent = nil
+            appState.openExecutePanel = nil
+            appState.closeExecutePanel = nil
+            appState.xpFrame = nil
+            appState.xpContent = nil
+            appState.openXrayPanel = nil
+            appState.closeXrayPanel = nil
+            appState.bpFrame = nil
+            appState.bpContent = nil
+            appState.openBoosterPanel = nil
+            appState.closeBoosterPanel = nil
+            appState.spFrame = nil
+            appState.spContent = nil
+            appState.openServerPanel = nil
+            appState.closeServerPanel = nil
+            appState.defFrame = nil
+            appState.defContent = nil
+            appState.openDefenderPanel = nil
+            appState.closeDefenderPanel = nil
+            appState.apFrame = nil
+            appState.apContent = nil
+            appState.openAPPanel = nil
+            appState.closeAPPanel = nil
+            appState.espFrame = nil
+            appState.espContent = nil
+            appState.openESPPanel = nil
+            appState.closeESPPanel = nil
+            appState.stretchFrame = nil
+            appState.stretchContent = nil
+            appState.openStretchPanel = nil
+            appState.closeStretchPanel = nil
+            appState.balloonFrame = nil
+            appState.balloonContent = nil
+            appState.openBalloonPanel = nil
+            appState.closeBalloonPanel = nil
+            appState.turretFrame = nil
+            appState.turretContent = nil
+            appState.openTurretPanel = nil
+            appState.closeTurretPanel = nil
+            appState.btFrame = nil
+            appState.btContent = nil
+            appState.openBTPanel = nil
+            appState.closeBTPanel = nil
+            do
+                local adminCommandBusy = false
+                local function getAdminPanel()
+                    local adminPanel = playerGui:FindFirstChild("AdminPanel")
+                    if not adminPanel then
+                        return nil
+                    end
+                    local adminPanel2 = adminPanel:FindFirstChild("AdminPanel")
+                    if not adminPanel2 then
+                        return nil
+                    end
+                    local profiles = adminPanel2:FindFirstChild("Profiles")
+                    profiles = profiles and profiles:FindFirstChild("ScrollingFrame")
+                    local scrollingFrame = adminPanel2:FindFirstChild("Commands")
+                    scrollingFrame = scrollingFrame and scrollingFrame:FindFirstChild("ScrollingFrame")
+                    if not profiles or not scrollingFrame then
+                        return nil
+                    end
+                    return {
+                        Gui = adminPanel,
+                        Panel = adminPanel2,
+                        Profiles = profiles,
+                        Commands = scrollingFrame,
+                    }
+                end
+                local function activateGuiButton(guiButton)
+                    if not guiButton or not guiButton:IsA("GuiButton") then
+                        return false
+                    end
+                    if type(firesignal) == "function" then
+                        if
+                            pcall(function()
+                                firesignal(guiButton.Activated)
+                            end)
+                        then
+                            return true
+                        end
+                        if
+                            pcall(function()
+                                firesignal(guiButton.MouseButton1Click)
+                            end)
+                        then
+                            return true
+                        end
+                    end
+                    if type(getconnections) == "function" then
+                        for _, item114 in ipairs({
+                            guiButton.Activated,
+                            guiButton.MouseButton1Click,
+                        }) do
+                            local ok, result = pcall(getconnections, item114)
+                            if ok and type(result) == "table" then
+                                for _, functionState118 in ipairs(result) do
+                                    if type(functionState118.Function) == "function" then
+                                        if pcall(functionState118.Function) then
+                                            return true
+                                        end
+                                        continue
+                                    end
+                                    if functionState118.Fire then
+                                        if
+                                            pcall(function()
+                                                functionState118:Fire()
+                                            end)
+                                        then
+                                            return true
+                                        end
+                                    end
+                                end
+                            end
+                        end
+                    end
+                    return false
+                end
+                findAdminCommandButton = function(commandName)
+                    local getAdminPanelResult120 = getAdminPanel()
+                    if not getAdminPanelResult120 then
+                        return nil
+                    end
+                    local findFirstChildResult121 = getAdminPanelResult120.Commands:FindFirstChild(commandName)
+                    if findFirstChildResult121 and findFirstChildResult121:IsA("GuiButton") then
+                        return findFirstChildResult121
+                    end
+                    local lowerResult123 = tostring(commandName):lower()
+                    for _, child in ipairs(getAdminPanelResult120.Commands:GetChildren()) do
+                        if child:IsA("GuiButton") and child.Name ~= "Template" then
+                            if child.Name:lower() == lowerResult123 then
+                                return child
+                            end
+                            local command = child:FindFirstChild("Command")
+                            if command and command:IsA("TextLabel") then
+                                if tostring(command.Text):lower():gsub("^;", ""):gsub("%s+", "") == lowerResult123 then
+                                    return child
+                                end
+                            end
+                        end
+                    end
+                    return nil
+                end
+                cloneAdminButtonIcon = function(instance127, parent)
+                    if not instance127 or not parent then
+                        return false
+                    end
+                    local imageLabel = instance127:FindFirstChildWhichIsA("ImageLabel", true)
+                        or instance127:FindFirstChildWhichIsA("ImageButton", true)
+                    if not imageLabel then
+                        return false
+                    end
+                    local clone = imageLabel:Clone()
+                    clone.Name = "NativeIcon"
+                    clone.AnchorPoint = Vector2.new(0.5, 0.5)
+                    clone.Position = UDim2.fromScale(0.5, 0.5)
+                    clone.Size = UDim2.new(1, -8, 1, -8)
+                    clone.BackgroundTransparency = 1
+                    clone.ZIndex = parent.ZIndex + 1
+                    if clone:IsA("ImageButton") then
+                        clone.AutoButtonColor = false
+                        clone.Active = false
+                    end
+                    clone.Parent = parent
+                    return true
+                end
+                local function findPlayerAdminButton(instance134)
+                    if not instance134 then
+                        return nil
+                    end
+                    local getAdminPanelResult135 = getAdminPanel()
+                    if not getAdminPanelResult135 then
+                        return nil
+                    end
+                    local findFirstChildResult136 = getAdminPanelResult135.Profiles:FindFirstChild(instance134.Name)
+                    if findFirstChildResult136 and findFirstChildResult136:IsA("GuiButton") then
+                        return findFirstChildResult136
+                    end
+                    for _, child in ipairs(getAdminPanelResult135.Profiles:GetChildren()) do
+                        if child:IsA("GuiButton") and child.Name ~= "Template" then
+                            if child.Name == instance134.Name then
+                                return child
+                            end
+                            local playerName = child:FindFirstChild("playerName")
+                            if playerName and playerName:IsA("TextLabel") and playerName.Text == instance134.Name then
+                                return child
+                            end
+                        end
+                    end
+                    return nil
+                end
+                executeAdminCommand = function(instance140, index141)
+                    if not instance140 or instance140.Parent ~= playersService then
+                        return false
+                    end
+                    local calculatedValue142 = os.clock() + 1.5
+                    while adminCommandBusy and os.clock() < calculatedValue142 do
+                        task.wait()
+                    end
+                    if adminCommandBusy then
+                        return false
+                    end
+                    adminCommandBusy = true
+                    local commandExecuted = false
+                    local ok = pcall(function()
+                        local findAdminCommandButtonResult145 = findAdminCommandButton(index141)
+                        local findPlayerAdminButtonResult146 = findPlayerAdminButton(instance140)
+                        if not findAdminCommandButtonResult145 or not findPlayerAdminButtonResult146 then
+                            return
+                        end
+                        if not activateGuiButton(findAdminCommandButtonResult145) then
+                            return
+                        end
+                        task.wait(0.01)
+                        if not activateGuiButton(findPlayerAdminButtonResult146) then
+                            return
+                        end
+   
